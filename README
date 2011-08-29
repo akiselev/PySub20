@@ -1,0 +1,28 @@
+# PySub20 - Python library for libsub
+
+## Installation
+
+Dependencies:
+* Libusb-1.0
+* Python 2.7 (other versions may work as well, untested)
+* Swig 1.3
+* gcc
+
+In order to build PySub20 you may need to edit a few things in the 'makeswig' file, which, for now, replaces a make file
+
+makeswig consists of the following commands:
+
+> swig -python -outdir ./ -o ./lib/libsub_wrap.c ./lib/libsub.i
+
+This creates the libsub wrapper and the python libsub library
+
+
+> gcc -c -w -fPIC ./lib/libsub.c ./lib/libsub_wrap.c -I/usr/include/python2.7 -I./lib -DLIBUSB_1_0 
+
+This compiles the libsub library and its wrapper. If your include path for Python is different from /usr/include/python2.7 you will need to change it.
+
+> gcc -shared -Wl,-soname,libsub.so -lusb-1.0 -o _libsub.so ./lib/libsub.o ./lib/libsub_wrap.o
+
+Creates the shared library which is used by the Python library. If your library reference is called something different from usb-1.0 then change it.
+
+Once built, just use the folder as a module in your application or add it to your Python path, in leu of a distutils setup.
