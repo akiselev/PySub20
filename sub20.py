@@ -1,4 +1,4 @@
-from libsub import libsub
+import libsub
 
 class Sub20:
     # Constants
