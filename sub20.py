@@ -1,4 +1,5 @@
 import libsub
+from exception import DeviceException
 
 class Sub20:
     # Constants
@@ -8,10 +9,13 @@ class Sub20:
     FPWM_EN2        = 0x0800
     
     def __init__(self, dev = 0, pinNames = 0):
-        if dev == 0:
-            self.device = libsub.sub_open(0)
-        else:
-            self.device = libsub.sub_open(libsub.sub_find_devices(dev))
+        res = libsub.sub_find_devices(dev)
+        if res == 0:
+            raise DeviceException(self.getError())
+        
+        self.device = libsub.sub_open(res)
+        if self.device == 0:
+            raise DeviceException(self.getError())
         
         code, port = libsub.sub_gpio_config(self.device, 0, 0)
         self.gpioPort = self._hex2binary(port)
@@ -21,6 +25,9 @@ class Sub20:
             
     def __del__(self):
         libsub.sub_close(self.device)
+        
+    def getError(self):
+        return libsub.sub_get_errno()
         
     def _hex2binary(self, byte):
         ''' Converts hex string to binary array '''
@@ -56,8 +63,8 @@ class Sub20:
     def writeLCD(self, string):
         ret = libsub.sub_lcd_write(self.device, string)
         if ret > 0:
-            # TODO: Write exception code
-            pass
+            raise DeviceException(self.getError())
+        return ret
     
     def gpioMask(self):
         return [0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0]
@@ -67,7 +74,7 @@ class Sub20:
         print self._binary2int(set_array)
         print self._binary2int(mask_array)
         if code > 0:
-            pass # TODO: Error handling
+            raise DeviceException(self.getError())
         return string
     
     def gpioDirection(self, pin, val):
@@ -86,13 +93,6 @@ class Sub20:
         set[pin_-1] = val
         code, port = libsub.sub_gpio_write(self.device, self._binary2int(set), self._binary2int(mask))
         return self._hex2binary(port)
-        
-    def __gpioRead(self, pin):
-        pin_ = self._getPin(pin)
-        code, port = libsub.sub_gpio_read(self.device)
-        port_ = self._hex2binary(port)
-        print port_
-        return port_[pin_]
     
     def gpioRead(self, pin):
         lip = []
@@ -104,13 +104,13 @@ class Sub20:
     def fpwmEnable(self):
         ret = libsub.sub_fpwm_config(self.device, 0, self.FPWM_ENABLE)
         if ret > 0:
-            pass #TODO Error handling
+            raise DeviceException(self.getError())
         return ret
     
     def fpwmDisable(self):
         ret = libsub.sub_fpwm_config(self.device, 0, 0)
         if ret > 0:
-            pass #TODO Error handling
+            raise DeviceException(self.getError())
         return ret
     
     def fpwmConfig(self, fnum, freq):
@@ -119,11 +119,11 @@ class Sub20:
         if fnum == 2: num = self.FPWM_EN2
         ret = libsub.sub_fpwm_config(self.device, freq, self.FPWM_ENABLE | num)
         if ret > 0:
-            pass #TODO Error handling
+            raise DeviceException(self.getError())
         return ret
     
     def fpwmSet(self, fnum, duty):
         ret = libsub.sub_fpwm_set(self.device, fnum, duty)
         if ret > 0:
-            pass #TODO Error handling
+            raise DeviceException(self.getError())
         return ret
