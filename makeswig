@@ -1,0 +1,7 @@
+#!/bin/bash
+set -x
+swig -python -outdir ./ -o ./lib/libsub_wrap.c ./lib/libsub.i 
+gcc -c -w -fPIC ./lib/libsub.c ./lib/libsub_wrap.c -I/usr/include/python2.7 -I./lib -DLIBUSB_1_0 
+mv libsub.o ./lib/
+mv libsub_wrap.o ./lib/
+gcc -shared -Wl,-soname,libsub.so -lusb-1.0 -o _libsub.so ./lib/libsub.o ./lib/libsub_wrap.o
