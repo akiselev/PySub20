@@ -22,6 +22,8 @@ class Sub20:
         self.pinNames = pinNames
         self.pinArray = [17, 18, 19, 20, 21, 22, 23, 24, 1, 2, 3, 4, 5, 6, 7, 8, 32, 31, 30, 29, 28, 27, 26, 25, 9, 10, 11, 12, 13, 14, 15, 16]
         self.fpwmStatus = 0
+        
+        return res
             
     def __del__(self):
         libsub.sub_close(self.device)
